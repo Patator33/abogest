@@ -51,7 +51,7 @@ app.delete('/api/data', (_req, res) => {
 });
 
 // Fallback SPA
-app.get('*', (_req, res) => {
+app.get('/{*splat}', (_req, res) => {
   res.sendFile(join(__dirname, 'dist', 'index.html'));
 });
 
