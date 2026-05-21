@@ -2,21 +2,19 @@ import { useState } from 'react';
 import { Shield, Eye, EyeOff, Fingerprint, AlertCircle } from 'lucide-react';
 import { verifyPassword } from '../../utils/crypto';
 import { authenticateWebAuthn } from '../../utils/webauthn';
-import { loadData } from '../../utils/storage';
+import type { AuthData } from '../../types';
 
 interface Props {
+  auth: AuthData;
   onLoginSuccess: () => void;
 }
 
-export default function LoginScreen({ onLoginSuccess }: Props) {
+export default function LoginScreen({ auth, onLoginSuccess }: Props) {
   const [password, setPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
   const [error, setError] = useState('');
   const [loadingPwd, setLoadingPwd] = useState(false);
   const [loadingHello, setLoadingHello] = useState(false);
-
-  const data = loadData();
-  const { auth } = data;
 
   const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();

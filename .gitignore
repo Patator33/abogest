@@ -15,6 +15,9 @@ dist-ssr
 # Claude Code
 .claude/
 
+# Données locales (montées en volume Docker)
+data/*.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

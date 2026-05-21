@@ -1,7 +1,5 @@
 import type { AppData, Category } from '../types';
 
-const STORAGE_KEY = 'abogest_data';
-
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-1', name: 'Streaming vidéo', color: '#e11d48' },
   { id: 'cat-2', name: 'Musique', color: '#16a34a' },
@@ -27,26 +25,39 @@ const DEFAULT_DATA: AppData = {
   },
 };
 
-export function loadData(): AppData {
+function mergeWithDefaults(parsed: Partial<AppData>): AppData {
+  return {
+    ...DEFAULT_DATA,
+    ...parsed,
+    auth: { ...DEFAULT_DATA.auth, ...parsed.auth },
+    settings: { ...DEFAULT_DATA.settings, ...parsed.settings },
+    subscriptions: parsed.subscriptions ?? [],
+    categories: parsed.categories ?? DEFAULT_CATEGORIES,
+  };
+}
+
+export async function loadData(): Promise<AppData> {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return structuredClone(DEFAULT_DATA);
-    const parsed = JSON.parse(raw) as Partial<AppData>;
-    return {
-      ...DEFAULT_DATA,
-      ...parsed,
-      auth: { ...DEFAULT_DATA.auth, ...parsed.auth },
-      settings: { ...DEFAULT_DATA.settings, ...parsed.settings },
-      subscriptions: parsed.subscriptions ?? [],
-      categories: parsed.categories ?? DEFAULT_CATEGORIES,
-    };
+    const res = await fetch('/api/data');
+    if (!res.ok) return structuredClone(DEFAULT_DATA);
+    const parsed = await res.json() as Partial<AppData> | null;
+    if (!parsed) return structuredClone(DEFAULT_DATA);
+    return mergeWithDefaults(parsed);
   } catch {
     return structuredClone(DEFAULT_DATA);
   }
 }
 
-export function saveData(data: AppData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+export async function saveData(data: AppData): Promise<void> {
+  await fetch('/api/data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export async function clearData(): Promise<void> {
+  await fetch('/api/data', { method: 'DELETE' });
 }
 
 export function generateId(): string {

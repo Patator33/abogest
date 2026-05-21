@@ -21,22 +21,21 @@ export default function App() {
 
   // Chargement initial
   useEffect(() => {
-    const d = loadData();
-    setData(d);
-    if (!d.auth.isSetup) {
-      setScreen('setup');
-    } else {
-      setScreen('login');
-    }
+    (async () => {
+      const d = await loadData();
+      setData(d);
+      setScreen(d.auth.isSetup ? 'login' : 'setup');
+    })();
   }, []);
 
   const updateData = useCallback((updated: AppData) => {
     setData(updated);
-    saveData(updated);
+    void saveData(updated);
   }, []);
 
-  const handleSetupComplete = () => {
-    setData(loadData());
+  const handleSetupComplete = async () => {
+    const d = await loadData();
+    setData(d);
     setScreen('login');
   };
 
@@ -109,7 +108,7 @@ export default function App() {
   }
 
   if (screen === 'login') {
-    return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
+    return <LoginScreen auth={data.auth} onLoginSuccess={handleLoginSuccess} />;
   }
 
   return (

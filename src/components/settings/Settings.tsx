@@ -6,7 +6,7 @@ import {
   isPlatformAuthenticatorAvailable,
   registerWebAuthn,
 } from '../../utils/webauthn';
-import { loadData, saveData } from '../../utils/storage';
+import { saveData, clearData } from '../../utils/storage';
 import type { Currency, AppData } from '../../types';
 
 const CURRENCIES: { value: Currency; label: string }[] = [
@@ -56,7 +56,7 @@ export default function Settings({ data, onDataChange }: Props) {
       const salt = await generateSalt();
       const hash = await hashPassword(newPwd, salt);
       const updated = { ...data, auth: { ...data.auth, passwordHash: hash, passwordSalt: salt } };
-      saveData(updated);
+      await saveData(updated);
       onDataChange(updated);
       setOldPwd(''); setNewPwd(''); setConfirmPwd('');
       setPwdMsg({ type: 'ok', text: 'Mot de passe modifié avec succès !' });
@@ -72,7 +72,7 @@ export default function Settings({ data, onDataChange }: Props) {
       const id = await registerWebAuthn();
       if (!id) { setHelloMsg({ type: 'error', text: "L'enregistrement a échoué." }); return; }
       const updated = { ...data, auth: { ...data.auth, webauthnEnabled: true, webauthnCredentialId: id } };
-      saveData(updated);
+      await saveData(updated);
       onDataChange(updated);
       setHelloMsg({ type: 'ok', text: 'Windows Hello activé avec succès !' });
     } finally {
@@ -82,14 +82,14 @@ export default function Settings({ data, onDataChange }: Props) {
 
   const handleDisableHello = () => {
     const updated = { ...data, auth: { ...data.auth, webauthnEnabled: false, webauthnCredentialId: undefined } };
-    saveData(updated);
+    void saveData(updated);
     onDataChange(updated);
     setHelloMsg({ type: 'ok', text: 'Windows Hello désactivé.' });
   };
 
   const handleCurrencyChange = (currency: Currency) => {
     const updated = { ...data, settings: { ...data.settings, defaultCurrency: currency } };
-    saveData(updated);
+    void saveData(updated);
     onDataChange(updated);
   };
 
@@ -117,7 +117,7 @@ export default function Settings({ data, onDataChange }: Props) {
           subscriptions: parsed.subscriptions,
           categories: parsed.categories ?? data.categories,
         };
-        saveData(updated);
+        void saveData(updated);
         onDataChange(updated);
         alert('Import réussi !');
       } catch {
@@ -128,9 +128,9 @@ export default function Settings({ data, onDataChange }: Props) {
     e.target.value = '';
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!confirm('Voulez-vous vraiment supprimer TOUTES les données ? Cette action est irréversible.')) return;
-    localStorage.clear();
+    await clearData();
     window.location.reload();
   };
 

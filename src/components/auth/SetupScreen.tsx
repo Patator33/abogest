@@ -55,7 +55,7 @@ export default function SetupScreen({ onSetupComplete }: Props) {
         credentialId = id;
       }
 
-      const data = loadData();
+      const data = await loadData();
       data.auth = {
         isSetup: true,
         passwordHash: hash,
@@ -63,7 +63,7 @@ export default function SetupScreen({ onSetupComplete }: Props) {
         webauthnEnabled: enableHello,
         webauthnCredentialId: credentialId,
       };
-      saveData(data);
+      await saveData(data);
       onSetupComplete();
     } catch (err) {
       setError('Une erreur est survenue. Veuillez réessayer.');
