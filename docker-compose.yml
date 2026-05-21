@@ -4,9 +4,12 @@ services:
     ports:
       - "${PORT:-3000}:${PORT:-3000}"
     volumes:
-      - ./data:/data
+      - abogest_data:/data
     environment:
       DATA_FILE: /data/abogest.json
       NODE_ENV: production
       PORT: ${PORT:-3000}
     restart: unless-stopped
+
+volumes:
+  abogest_data:
