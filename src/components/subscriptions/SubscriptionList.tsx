@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Search, SlidersHorizontal, TrendingUp } from 'lucide-react';
 import SubscriptionCard from './SubscriptionCard';
+import CategoryPieChart from './CategoryPieChart';
 import { calculateMonthlyTotal, formatCurrency } from '../../utils/calculations';
 import type { Subscription, Category } from '../../types';
 
@@ -178,31 +179,16 @@ export default function SubscriptionList({
         </div>
       )}
 
-      {/* Répartition par catégorie */}
-      {byCategory.length > 1 && (
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mt-2">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Répartition mensuelle par catégorie</h3>
-          <div className="space-y-2">
-            {byCategory.map(({ cat, total }) => (
-              <div key={cat.id} className="flex items-center gap-3">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
-                <span className="text-sm text-gray-600 flex-1">{cat.name}</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {formatCurrency(total, defaultCurrency)}
-                </span>
-                <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${monthly > 0 ? (total / monthly) * 100 : 0}%`,
-                      backgroundColor: cat.color,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* Camembert de répartition */}
+      {byCategory.length > 0 && (
+        <CategoryPieChart
+          slices={byCategory.map(({ cat, total }) => ({
+            label: cat.name,
+            value: total,
+            color: cat.color,
+          }))}
+          defaultCurrency={defaultCurrency}
+        />
       )}
     </div>
   );
