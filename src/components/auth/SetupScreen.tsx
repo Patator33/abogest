@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, Fingerprint, Eye, EyeOff, CheckCircle } from 'lucide-react';
-import { generateSalt, hashPassword } from '../../utils/crypto';
+import { hashPassword } from '../../utils/crypto';
 import {
   isPlatformAuthenticatorAvailable,
   registerWebAuthn,
@@ -40,8 +40,7 @@ export default function SetupScreen({ onSetupComplete }: Props) {
 
     setLoading(true);
     try {
-      const salt = await generateSalt();
-      const hash = await hashPassword(password, salt);
+      const { hash, salt } = await hashPassword(password);
 
       let credentialId: string | undefined;
       if (enableHello) {

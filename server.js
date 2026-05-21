@@ -1,7 +1,11 @@
 import express from 'express';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
+import { randomBytes, pbkdf2 } from 'crypto';
+import { promisify } from 'util';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+
+const pbkdf2Async = promisify(pbkdf2);
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_FILE = process.env.DATA_FILE ?? join(__dirname, 'data', 'abogest.json');
@@ -47,6 +51,35 @@ app.delete('/api/data', (_req, res) => {
     res.json({ ok: true });
   } catch {
     res.status(500).json({ error: 'Erreur de suppression' });
+  }
+});
+
+// POST /api/auth/hash — hache un mot de passe (PBKDF2-SHA256, 100k itérations)
+app.post('/api/auth/hash', async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Mot de passe requis' });
+    }
+    const saltBuf = randomBytes(32);
+    const key = await pbkdf2Async(password, saltBuf, 100000, 32, 'sha256');
+    res.json({ hash: key.toString('base64'), salt: saltBuf.toString('base64') });
+  } catch {
+    res.status(500).json({ error: 'Erreur de hachage' });
+  }
+});
+
+// POST /api/auth/verify — vérifie un mot de passe
+app.post('/api/auth/verify', async (req, res) => {
+  try {
+    const { password, salt, hash } = req.body;
+    if (!password || !salt || !hash) {
+      return res.status(400).json({ error: 'Champs manquants' });
+    }
+    const key = await pbkdf2Async(password, Buffer.from(salt, 'base64'), 100000, 32, 'sha256');
+    res.json({ ok: key.toString('base64') === hash });
+  } catch {
+    res.status(500).json({ error: 'Erreur de vérification' });
   }
 });
 

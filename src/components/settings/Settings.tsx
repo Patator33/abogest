@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Key, Fingerprint, Download, Upload, Trash2, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
-import { generateSalt, hashPassword, verifyPassword } from '../../utils/crypto';
+import { hashPassword, verifyPassword } from '../../utils/crypto';
 import {
   isPlatformAuthenticatorAvailable,
   registerWebAuthn,
@@ -52,8 +52,7 @@ export default function Settings({ data, onDataChange }: Props) {
       const ok = await verifyPassword(oldPwd, data.auth.passwordSalt, data.auth.passwordHash);
       if (!ok) { setPwdMsg({ type: 'error', text: 'Ancien mot de passe incorrect.' }); return; }
 
-      const salt = await generateSalt();
-      const hash = await hashPassword(newPwd, salt);
+      const { hash, salt } = await hashPassword(newPwd);
       const updated = { ...data, auth: { ...data.auth, passwordHash: hash, passwordSalt: salt } };
       await saveData(updated);
       onDataChange(updated);
