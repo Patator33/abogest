@@ -2,10 +2,11 @@ services:
   abogest:
     build: .
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:${PORT:-3000}"
     volumes:
       - ./data:/data
     environment:
       DATA_FILE: /data/abogest.json
       NODE_ENV: production
+      PORT: ${PORT:-3000}
     restart: unless-stopped
