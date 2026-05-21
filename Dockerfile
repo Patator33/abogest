@@ -11,8 +11,10 @@ RUN npm run build
 FROM node:22-alpine
 
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
+
+# Installer uniquement express (pas de lock file Windows incompatible)
+RUN echo '{"type":"module","dependencies":{"express":"^5.2.1"}}' > package.json \
+    && npm install --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY server.js ./
