@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Shield, Fingerprint, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { generateSalt, hashPassword } from '../../utils/crypto';
 import {
-  isWebAuthnSupported,
   isPlatformAuthenticatorAvailable,
   registerWebAuthn,
 } from '../../utils/webauthn';
